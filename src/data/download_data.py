@@ -1,5 +1,5 @@
 """
-Day 2 — Download and slice the transfermarkt-datasets DuckDB database
+Download and slice the transfermarkt-datasets DuckDB database
 down to just the 5 leagues we care about, and export the tables we
 need as CSVs into data/raw/.
 
