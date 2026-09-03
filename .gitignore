@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Data (raw/processed data usually shouldn't live in git — keep repo light)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Trained models (large binaries)
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+# Environment / secrets
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Jupyter
+*.ipynb_checkpoints
+
+# Reports (generated figures, keep the dir, not the output)
+reports/figures/*.png
+!reports/figures/.gitkeep
