@@ -45,3 +45,18 @@ def predict_value(model, info, feature_row: pd.DataFrame):
         raise NotImplementedError("Scaling path not needed for the current model.")
     pred_log = model.predict(feature_row)[0]
     return float(np.expm1(pred_log))
+
+@st.cache_data
+def load_club_lookup():
+    """Club names aren't in the feature table (never carried through the
+    pipeline), so pull them separately from the raw players data for
+    display purposes only -- not used as a model feature."""
+    raw = pd.read_csv("data/raw/players.csv")
+    return raw[["player_id", "current_club_name"]].drop_duplicates("player_id")
+
+
+def get_model_input_row(df_row: pd.DataFrame, feature_columns: list) -> pd.DataFrame:
+    """Given one row (as a 1-row DataFrame) from the feature table,
+    return just the columns the model expects, in a form ready for
+    model.predict()."""
+    return df_row[feature_columns]
