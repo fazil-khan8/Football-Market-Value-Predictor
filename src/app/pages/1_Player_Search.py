@@ -1,11 +1,12 @@
 """
-Player Search page - Day 14: real search, stats display, and live
-market value prediction.
+Player Search page - adds live search suggestions (via a searchable
+dropdown) and player photos, before moving on to Day 15.
 """
 import streamlit as st
 import sys
 import os
 import numpy as np
+import pandas as pd
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import load_model, load_player_data, load_club_lookup, get_feature_columns, get_model_input_row
@@ -25,7 +26,6 @@ LEAGUE_COLS = {
     "Serie A": "league_Serie A",
     "Ligue 1": "league_Ligue 1",
 }
-
 POSITION_COLS = {
     "Attack": "position_Attack",
     "Midfield": "position_Midfield",
@@ -45,35 +45,56 @@ filtered = df
 if league_choice != "All":
     filtered = filtered[filtered[LEAGUE_COLS[league_choice]] == True]
 
-search_query = st.text_input("Search for a player", placeholder="e.g. Lamine Yamal")
-
-if not search_query:
-    st.caption("Start typing a player's name above.")
-    st.stop()
-
-matches = filtered[filtered["name"].str.contains(search_query, case=False, na=False)]
-
-if matches.empty:
-    st.warning("No players found matching that name (and league filter, if set).")
-    st.stop()
-
-matches = matches.sort_values(["name", "season"], ascending=[True, False])
-matches["_position_name"] = matches.apply(get_position_name, axis=1)
-matches["_label"] = matches.apply(
-    lambda r: f"{r['name']} — season {int(r['season'])}, age {r['age']:.0f}, {r['_position_name']}",
+player_ids_in_scope = filtered["player_id"].unique()
+player_display = (
+    df[df["player_id"].isin(player_ids_in_scope)][["player_id", "name"]]
+    .drop_duplicates("player_id")
+    .merge(clubs[["player_id", "current_club_name"]], on="player_id", how="left")
+)
+player_display["label"] = player_display.apply(
+    lambda r: f"{r['name']} ({r['current_club_name'] if pd.notna(r['current_club_name']) else 'Unknown club'})",
     axis=1
 )
-choice_label = st.selectbox("Select player + season", matches["_label"].tolist())
-selected_row = matches[matches["_label"] == choice_label].iloc[[0]]
+player_display = player_display.sort_values("name")
+
+selected_label = st.selectbox(
+    "Search for a player",
+    options=player_display["label"].tolist(),
+    index=None,
+    placeholder="Start typing a player's name...",
+)
+
+if not selected_label:
+    st.caption("Start typing a player's name above to see suggestions.")
+    st.stop()
+
+selected_player_id = player_display.loc[player_display["label"] == selected_label, "player_id"].values[0]
+player_seasons = filtered[filtered["player_id"] == selected_player_id].sort_values("season", ascending=False)
+
+season_labels = player_seasons.apply(
+    lambda r: f"Season {int(r['season'])}, age {r['age']:.0f}, {get_position_name(r)}", axis=1
+)
+season_choice = st.selectbox("Select season", season_labels.tolist())
+selected_row = player_seasons.iloc[[season_labels.tolist().index(season_choice)]]
 
 row = selected_row.iloc[0]
 position_name = get_position_name(row)
 league_name = get_league_name(row)
 club_match = clubs[clubs["player_id"] == row["player_id"]]
 club_name = club_match["current_club_name"].values[0] if not club_match.empty else "Unknown"
+photo_url = club_match["image_url"].values[0] if not club_match.empty else None
 
 st.divider()
-st.subheader(row["name"])
+
+photo_col, name_col = st.columns([1, 4])
+with photo_col:
+    if isinstance(photo_url, str) and photo_url.startswith("http"):
+        st.image(photo_url, width=120)
+    else:
+        st.caption("No photo available")
+with name_col:
+    st.subheader(row["name"])
+    st.caption(f"{position_name} · {club_name} · {league_name}")
 
 info_col1, info_col2, info_col3, info_col4 = st.columns(4)
 info_col1.metric("Age (that season)", f"{row['age']:.0f}")

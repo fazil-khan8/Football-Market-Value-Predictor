@@ -48,11 +48,11 @@ def predict_value(model, info, feature_row: pd.DataFrame):
 
 @st.cache_data
 def load_club_lookup():
-    """Club names aren't in the feature table (never carried through the
-    pipeline), so pull them separately from the raw players data for
-    display purposes only -- not used as a model feature."""
+    """Club names and photo URLs aren't in the feature table, so pull
+    them separately from the raw players data for display purposes
+    only -- not used as model features."""
     raw = pd.read_csv("data/raw/players.csv")
-    return raw[["player_id", "current_club_name"]].drop_duplicates("player_id")
+    return raw[["player_id", "current_club_name", "image_url"]].drop_duplicates("player_id")
 
 
 def get_model_input_row(df_row: pd.DataFrame, feature_columns: list) -> pd.DataFrame:
