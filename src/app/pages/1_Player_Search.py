@@ -127,3 +127,14 @@ pred_col1, pred_col2 = st.columns(2)
 pred_col1.metric("💰 Predicted Market Value", f"€{predicted_eur:,.0f}")
 pred_col2.metric("Actual Market Value", f"€{actual_eur:,.0f}",
                   delta=f"{(predicted_eur - actual_eur) / actual_eur * 100:+.0f}% vs predicted")
+
+
+st.divider()
+st.subheader("📈 Market value history")
+history = df[df["player_id"] == row["player_id"]].sort_values("season")
+if len(history) > 1:
+    chart_data = history.set_index("season")["market_value_eur"] / 1_000_000
+    st.line_chart(chart_data)
+    st.caption("Actual market value (€M) across every season on record for this player.")
+else:
+    st.caption("Only one season on record for this player -- not enough data for a trend.")
