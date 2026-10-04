@@ -14,6 +14,17 @@ A Streamlit app lets you:
 ![Custom Prediction](reports/screenshots/3.png)
 ![Model Insights](reports/screenshots/4.png)
 
+
+## What I learned
+
+- **Data engineering is most of the work.** Cleaning, merging, and matching raw data across two different sources took far longer than training any model.
+- **Evidence beats assumption.** A better algorithm alone didn't fix the position-fairness problem — SHAP proved it, which is what pushed me to go find real defensive/keeper data instead.
+- **Debugging environment issues is a core ML skill.** Hit and fixed three separate library version mismatches (XGBoost on Mac, SHAP/XGBoost incompatibility, Kaggle API changes) — not just following a tutorial.
+- **Know when to stop chasing a metric.** A smaller, "cleaner" training set looked better on one score but was worse where it actually mattered — reverted to the full dataset instead of picking the flattering number.
+- **Explainability tools turn belief into proof.** SHAP's per-position breakdown is what revealed the position-fairness fix was only partial, not assumed accuracy.
+- **Using the app surfaces bugs modeling alone never would.** Building Player Search exposed that club names and plain position labels never made it through the pipeline.
+
+
 ## Pipeline overview
 
 ```mermaid
