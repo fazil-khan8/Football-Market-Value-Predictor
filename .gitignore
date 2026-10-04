@@ -13,11 +13,14 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/raw/players.csv
+!data/processed/player_seasons_features_v2.csv
 
 # Trained models (large binaries)
 models/*.pkl
 models/*.joblib
 !models/.gitkeep
+!models/best_model.pkl
 
 # Environment / secrets
 .env
