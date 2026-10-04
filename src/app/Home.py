@@ -5,6 +5,7 @@ chart instead of a plain bullet list.
 import streamlit as st
 import sys
 import os
+import plotly.express as px
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils import load_model, load_player_data
@@ -58,8 +59,22 @@ top_players = (
     df.sort_values("market_value_eur", ascending=False)
     .drop_duplicates("player_id")
     .head(10)
-    .set_index("name")["market_value_eur"]
-    / 1_000_000
+    .sort_values("market_value_eur")
 )
-st.bar_chart(top_players)
-st.caption("Highest single-season market value on record for each player, in €M.")
+fig = px.bar(
+    top_players,
+    x="market_value_eur",
+    y="name",
+    orientation="h",
+    labels={"market_value_eur": "Market Value (€)", "name": ""},
+)
+fig.update_layout(
+    height=400,
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    font_color="#FAFAFA",
+    xaxis=dict(tickprefix="€", tickformat=",.0f"),
+)
+fig.update_traces(marker_color="#00C853")
+st.plotly_chart(fig, use_container_width=True)
+st.caption("Highest single-season market value on record for each player.")
